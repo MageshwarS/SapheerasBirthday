@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Birthday</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    overflow:hidden;
+    background:linear-gradient(to bottom,#020111,#191621);
+    height:100vh;
+    font-family:Arial, sans-serif;
+}
+
+canvas{
+    position:absolute;
+    top:0;
+    left:0;
+}
+
+.center{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+    z-index:10;
+}
+
+.gift-btn{
+    padding:20px 40px;
+    border:none;
+    border-radius:50px;
+    font-size:24px;
+    cursor:pointer;
+    background:linear-gradient(45deg,#ff0080,#ffcc00);
+    color:white;
+    box-shadow:0 0 25px #ff0080;
+    animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.1);}
+    100%{transform:scale(1);}
+}
+
+.message{
+    display:none;
+    color:white;
+    text-align:center;
+}
+
+.message h1{
+    font-size:70px;
+    text-shadow:0 0 20px gold;
+    animation:zoomIn 2s ease;
+}
+
+.message p{
+    margin-top:20px;
+    font-size:25px;
+}
+
+@keyframes zoomIn{
+    from{
+        transform:scale(0);
+        opacity:0;
+    }
+    to{
+        transform:scale(1);
+        opacity:1;
+    }
+}
+
+.balloon{
+    position:absolute;
+    bottom:-150px;
+    font-size:50px;
+    animation:floatUp linear infinite;
+}
+
+@keyframes floatUp{
+    from{
+        transform:translateY(0);
+    }
+    to{
+        transform:translateY(-120vh);
+    }
+}
+
+.stars{
+    position:absolute;
+    width:3px;
+    height:3px;
+    background:white;
+    border-radius:50%;
+    animation:twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle{
+    from{opacity:.3;}
+    to{opacity:1;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="center" id="welcome">
+    <button class="gift-btn" onclick="startBirthday()">
+        🎁 Click Here
+    </button>
+</div>
+
+<div class="center message" id="message">
+    <h1>🎉 HAPPY BIRTHDAY SAPHEERA♥️ 🎉</h1>
+    <p id="nameText"></p>
+	<p>May your days be filled with joy, your heart with peace, and your life with endless reasons to smile 💖✨</p>
+</div>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+window.addEventListener("resize",()=>{
+    canvas.width=window.innerWidth;
+    canvas.height=window.innerHeight;
+});
+
+for(let i=0;i<150;i++){
+    let star=document.createElement("div");
+    star.className="stars";
+    star.style.left=Math.random()*100+"vw";
+    star.style.top=Math.random()*100+"vh";
+    star.style.animationDelay=Math.random()*2+"s";
+    document.body.appendChild(star);
+}
+
+class Firework{
+    constructor(x,y,color){
+        this.particles=[];
+
+        for(let i=0;i<80;i++){
+            this.particles.push({
+                x:x,
+                y:y,
+                dx:(Math.random()-0.5)*8,
+                dy:(Math.random()-0.5)*8,
+                alpha:1,
+                color:color
+            });
+        }
+    }
+
+    update(){
+        this.particles.forEach(p=>{
+            p.x+=p.dx;
+            p.y+=p.dy;
+            p.dy+=0.03;
+            p.alpha-=0.01;
+        });
+
+        this.particles=this.particles.filter(p=>p.alpha>0);
+    }
+
+    draw(){
+        this.particles.forEach(p=>{
+            ctx.globalAlpha=p.alpha;
+            ctx.fillStyle=p.color;
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,3,0,Math.PI*2);
+            ctx.fill();
+        });
+        ctx.globalAlpha=1;
+    }
+}
+
+const fireworks=[];
+
+function createFirework(){
+    const x=Math.random()*canvas.width;
+    const y=Math.random()*canvas.height/2;
+
+    const colors=[
+        "#ff0000",
+        "#00ff00",
+        "#00ffff",
+        "#ffff00",
+        "#ff00ff",
+        "#ffffff",
+        "#ff8800"
+    ];
+
+    fireworks.push(
+        new Firework(
+            x,
+            y,
+            colors[Math.floor(Math.random()*colors.length)]
+        )
+    );
+}
+
+function animate(){
+    requestAnimationFrame(animate);
+
+    ctx.fillStyle="rgba(0,0,0,0.2)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    fireworks.forEach(f=>{
+        f.update();
+        f.draw();
+    });
+}
+
+animate();
+
+function startBirthday(){
+
+    const params=new URLSearchParams(window.location.search);
+    const name=params.get("name");
+
+    document.getElementById("nameText").innerText=name;
+
+    document.getElementById("welcome").style.display="none";
+    document.getElementById("message").style.display="block";
+
+    setInterval(createFirework,400);
+
+    for(let i=0;i<20;i++){
+        createBalloon();
+    }
+}
+
+function createBalloon(){
+    const balloon=document.createElement("div");
+
+    balloon.className="balloon";
+
+    const emojis=["🎈","🎉","🎊"];
+
+    balloon.innerHTML=
+        emojis[Math.floor(Math.random()*emojis.length)];
+
+    balloon.style.left=Math.random()*100+"vw";
+
+    balloon.style.animationDuration=
+        (8+Math.random()*8)+"s";
+
+    document.body.appendChild(balloon);
+
+    setTimeout(()=>{
+        balloon.remove();
+    },16000);
+}
+</script>
+
+</body>
+</html>
